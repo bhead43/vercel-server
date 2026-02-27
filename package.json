@@ -1,0 +1,13 @@
+{
+  "name": "hono",
+  "type": "module",
+  "dependencies": {
+    "csv-parse": "^6.1.0",
+    "hono": "^4.12.3"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.17",
+    "tsx": "^4.7.1",
+    "typescript": "^5.8.3"
+  }
+}
