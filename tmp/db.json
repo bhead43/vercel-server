@@ -1,1 +1,20 @@
-{"assets":{"peak":{"name":"Brandon","greeting":"Howdy"},"ishy":{"name":"Ishmael","greeting":"Hallo"},"test1":{"name":"Jimmy","greeting":"Heyo"}}}
+{
+    "assets": {
+        "peak.png": {
+            "name": "Brandon",
+            "greeting": "Howdy"
+        },
+        "ishy.png": {
+            "name": "Ishmael",
+            "greeting": "Hallo"
+        },
+        "test1.png": {
+            "name": "Jimmy",
+            "greeting": "Heyo"
+        },
+        "vtl_R_h_a_pos_clr_rgb_190723.EPS": {
+            "name": "EPS asset",
+            "greeting": "annoying file type"
+        }
+    }
+}
