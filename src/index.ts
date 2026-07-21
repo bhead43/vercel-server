@@ -1,10 +1,11 @@
 import { Hono } from 'hono';
 import * as fs from 'fs';
-import { parse } from "csv-parse";
 import path from 'path';
-import { Readable } from 'stream';
+import { initDB, basicDB } from './database.js';
 
 let db: any;
+// exists as a super basic gettable + settable JSON
+const basicDb = basicDB();
 // Very simple check if /initDB will actually do anything, no reason to parse sheet every time a call gets made from connector
 let dbLastSheet = "";
 
@@ -54,44 +55,34 @@ search.get("/all", async (context: any) => {
   context.header("Access-Control-Allow-Origin", "*");
   return context.json(db.getSheet(), 201);
 });
+
+const genericConnector = new Hono().basePath('/genericConnector');
+genericConnector.get("/metadata/:asset", async (context: any) => {
+  const asset = context.req.param('asset');
+  context.header("Access-Control-Allow-Origin", "*");
+
+  return context.json(basicDb.getMetadata(asset), 201);
+});
+
+genericConnector.post("/updateMetadata/:asset", async(context: any) => {
+  const body = await context.req.json();
+  const asset = context.req.param('asset');
+
+  const key = body.metadataKey;
+  const value = body.metadataValue;
+  console.log(body, key, value);
+  basicDb.updateMetadata(asset, key, value);
+  return context.text("Updated metadata!");
+});
+
 const app = new Hono();
 app.route("/", resources);
 app.route("/", search);
+app.route("/", genericConnector);
 app.get("/", context => {
   return context.text("Hello :)");
 })
 
-// moving all of the database.ts stuff to the main index.ts file, don't want to debug vercel stuff anymore...
-async function initDB(csvEndpoint: any) {
-  // Assume fetching the CSV
-  const csv = await fetch(csvEndpoint);
-  const csvData: any = [];
-  const parser = parse({ columns: true });
-  const csvPath = path.join(process.cwd(), "public", "loadedFile.csv");
-  // instead of writing to the path, create readable stream from whatever CSV we get
-  const stream = new Readable();
-  stream.push(await csv.text());
-  stream.push(null);
-  // Read raw CSV as stream, then parse to array of JSONs using csv-parse
-  return new Promise((res, rej) => {
-    stream
-      .pipe(parser)
-      .on('data', (r) => {
-        csvData.push(r);
-      });
-    parser.on('end', () => {
-      res({
-        getRecord: (searchOn: string, query: string) => {
-          // needs some basic handling for records not found
-          return csvData.find((record: any) => record[searchOn] == query);
-        },
-        // Probably won't use, but nice to have just in case
-        getSheet: () => {
-          return csvData;
-        }
-      });
-    });
-  })
-}
+
 
 export default app;
